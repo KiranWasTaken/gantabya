@@ -80,10 +80,10 @@ WSGI_APPLICATION = 'gantabya.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gantabya_db',
-        'USER': 'root',
-        'PASSWORD': 'Gantabya2025',
-        'HOST': '127.0.0.1',
+        'NAME': 'gantabya',
+        'USER': 'gantabya_user',
+        'PASSWORD': 'gantabya_password',
+        'HOST': 'mysql-gantabya',
         'PORT': '3306',
     }
 }

@@ -1,21 +1,26 @@
-Stage 1: Build environment
+#Stage 1: Build environment
 FROM python:3.10-slim as builder
-FROM hereshem/python:django4.2.15 AS builder
 WORKDIR /app
 
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Optional: If you need mysqlclient installed separately for some reason:
+# RUN pip install --no-cache-dir mysqlclient
+
+# Copy app files
 COPY . .
-Create an empty .env file
 RUN touch .env
 
-FROM builder AS test
-RUN python3 manage.py makemigrations
-RUN python3 manage.py test apps
-
+# Stage: main
 FROM builder AS main
 RUN python manage.py collectstatic --noinput
-CMD to run your application
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-CMD ["gunicorn", "config.wsgi", "--bind","0.0.0.0:8000","--log-file","/logs"]
-CMD ["gunicorn", "config.wsgi", "--bind", "0.0.0.0:8000", "--log-level", "debug"]
