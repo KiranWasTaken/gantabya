@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-4e@e@#ch7hxi*f6b&p-_%6zw2(g55m%pt+*ueychg&ec99tcjh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['13.61.22.70', '127.0.0.1']
+ALLOWED_HOSTS = ['13.61.22.70','51.20.183.97', '127.0.0.1']
 
 
 # Application definition
@@ -77,23 +77,42 @@ WSGI_APPLICATION = 'gantabya.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 # local database
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'gantabya',
+#         'USER': 'gantabya_user',
+#         'PASSWORD': 'gantabya_password',
+#         'HOST': 'mysql-gantabya',
+#         'PORT': '3306',
+#     }
+# }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',  # This creates a SQLite database file in your project directory
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gantabya',
-        'USER': 'gantabya_user',
-        'PASSWORD': 'gantabya_password',
-        'HOST': 'mysql-gantabya',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.postgresql',  # Correct Django backend for PostgreSQL
+        'NAME': 'gantabya',                        # Replace with your database name
+        'USER': 'root',                            # Replace with your database username
+        'PASSWORD': 'secret',                      # Replace with your database password
+        'HOST': 'postgres',                       # Database server (use IP or domain if not local)
+        'PORT': '5432',                            # Default PostgreSQL port
     }
 }
 
+
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'gantabya_db',
-#         'USER': 'gantabya_user',
-#         'PASSWORD': 'gantabya2025',
+#         'ENGINE': 'postgres',
+#         'NAME': 'gantabya',
+#         'USER': 'root',
+#         'PASSWORD': 'secret',
 #         'HOST': 'localhost',
 #         'PORT': '5432',
 #     }

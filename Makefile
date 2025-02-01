@@ -3,19 +3,23 @@ login:
 	docker login
 
 dbuild:
-	docker  build --platform linux/amd64 -t sugamdocker35/gantabya:v1 .
+	docker  build --platform linux/amd64 -t sugamdocker35/gantabya:v4 .
 
 push:
-	docker push sugamdocker35/gantabya:v1
+	docker push sugamdocker35/gantabya:v4
 
 ssh:
 	ssh root@64.227.135.50
+	ssh -i gantabya.pem ubuntu@13.61.22.70
+
+postgres:
+	docker run --name gantabya --network gantabya -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_DB=gantabya -e POSTGRES_PASSWORD=secret -d postgres:alpine
 
 ssh-pwd:
 	
 
 create-network:
-	docker network create app-network
+	docker network create app
 venv:
 	python3 -m venv venv
 
@@ -39,10 +43,10 @@ lint:
 	pylint apps
 
 network:
-	docker create network app
+	docker network create app
 
 docker-run:
-	docker run --name gantabya --network app -d -p 80:8000  sugamdocker35/gantabyya:v1 
+	docker run --name gantabya --network gantabya -d -p 80:8000  sugamdocker35/gantabya:v4
 
 log:
 	docker logs gantabya -f

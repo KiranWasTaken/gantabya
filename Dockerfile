@@ -1,26 +1,22 @@
-#Stage 1: Build environment
-FROM python:3.10-slim as builder
+FROM python:3.10-slim
+
+# Install system dependencies for psycopg2 and cleanup in one layer
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libpq-dev python3-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    default-libmysqlclient-dev \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install
-COPY requirements.txt requirements.txt
+# Install Python dependencies first for better layer caching
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Optional: If you need mysqlclient installed separately for some reason:
-# RUN pip install --no-cache-dir mysqlclient
-
-# Copy app files
 COPY . .
-RUN touch .env
 
-# Stage: main
-FROM builder AS main
+# Run collectstatic after dependencies are installed
 RUN python manage.py collectstatic --noinput
+
+EXPOSE 8000
+
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
