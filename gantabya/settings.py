@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +29,10 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['13.61.22.70','51.20.183.97', '127.0.0.1']
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7), 
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+}
 
 # Application definition
 
@@ -101,7 +107,7 @@ DATABASES = {
         'NAME': 'gantabya',                        # Replace with your database name
         'USER': 'root',                            # Replace with your database username
         'PASSWORD': 'secret',                      # Replace with your database password
-        'HOST': 'postgres',                       # Database server (use IP or domain if not local)
+        'HOST': 'localhost',                       # Database server (use IP or domain if not local)
         'PORT': '5432',                            # Default PostgreSQL port
     }
 }

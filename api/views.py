@@ -1,14 +1,35 @@
+import requests
+from datetime import datetime
 from django.conf import settings
 from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-# from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.contrib.auth import authenticate
+from .serializers import DestinationSerializer, TravelPlanSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Destination
+from .models import TravelPlan
 from .utils import get_weather
 
-# Create your views here.
-from rest_framework import status
+
+
+
+
 User = get_user_model() 
 print(f"AUTH_USER_MODEL is {User}") 
 #Signup
@@ -38,9 +59,6 @@ class SignUpView(APIView):
             print(f"Error occurred: {e}")  # Log the error
             return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-#Sign-In API
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
 
 class LoginView(APIView):
     def post(self, request):
@@ -57,15 +75,10 @@ class LoginView(APIView):
             "access": str(refresh.access_token),
         }, status=status.HTTP_200_OK)
 
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 class LoginView(TokenObtainPairView):
     pass
 
-
-#Forgot Password API
-from django.core.mail import send_mail
-# from django.contrib.auth.models import User
 
 class ForgotPasswordView(APIView):
     def post(self, request):
@@ -88,9 +101,7 @@ class ForgotPasswordView(APIView):
         return Response({"message": "Password reset email sent"}, status=status.HTTP_200_OK)
 
 #DestinationListCreateView
-from .models import Destination
-from .serializers import DestinationSerializer
-from rest_framework.permissions import IsAuthenticated
+
 
 class DestinationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -118,24 +129,12 @@ class DeleteAccountView(APIView):
         return Response({"message": "Account deleted successfully."}, status=status.HTTP_200_OK)
     
 
-#Popular Destinations API
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import Destination
-from .serializers import DestinationSerializer, TravelPlanSerializer
-
 class PopularDestinationsView(APIView):
     def get(self, request):
         popular_destinations = Destination.objects.order_by('-popularity')[:10]
         serializer = DestinationSerializer(popular_destinations, many=True)
         return Response(serializer.data, status=200)
     
-
-
-#Search Destination API
-from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
 
 class DestinationSearchView(ListAPIView):
     queryset = Destination.objects.all()
@@ -144,14 +143,6 @@ class DestinationSearchView(ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['name', 'description', 'location']  # Fields to search
 
-
-#Destination Details View
-# views.py
-from rest_framework.generics import RetrieveAPIView
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Destination
 
 class DestinationDetailView(APIView):
     def get(self, request, destination_id):
@@ -194,10 +185,6 @@ class DestinationDetailView(APIView):
 #             )
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-#Cost Calculation Logic
-from datetime import datetime
-from .models import TravelPlan
 
 def calculate_cost(travel_plan):
     # Example Base Costs
@@ -291,8 +278,6 @@ class TravelPlanCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-import requests
 
 def fetch_weather_data(city_name):
     """Fetch weather data from an external API."""
