@@ -1,20 +1,40 @@
-# Techniques
 
-Based on the search results provided, the following algorithms are relevant to optimizing travel itineraries and costs:
+### Functionality:
 
-## Genetic Algorithms
-    They are used for optimizing the itinerary by considering factors like cost, time, user preferences, and sustainability. They are effective but have a time complexity of O(g.p.f), where g is the number of generations, p is the population size, and f is the complexity of the fitness function.
+1.  **Import necessary modules:**
+    *   `datetime` and `timedelta` for date calculations.
+    *   `TravelCost` from `.models` to fetch historical travel costs.
+    *   `Avg` and `F` from `django.db.models` for database aggregations and field access.
+    *   `random` for generating random numbers for seasonality adjustments.
 
-## Greedy Heuristics
-    These are used for sustainability checking and can be applied to select travel options with the lowest possible carbon footprint iteratively. They are efficient and easy to implement but may not guarantee the globally optimal solution and are inflexible in complicated situations. The Greedy Heuristic functions with a sorting time of O(n log n) for sorting and O(n) for selection making it suitable for real-time applications that require instantaneous decision making.
+2.  **Define `cost_estimation` function:**
+    *   Takes `destination_id`, `start_date`, `end_date`, and `budget` as input.
+    *   Calculates a date range for historical data, spanning one year before and after the `start_date`.
 
-## Machine Learning Models
-    These are used for both cost forecasting and personalization, enabling real-time, multi-disciplinary optimization. They process large volumes of data and recommend itineraries that address the various travel goals of the traveler, i.e., preference, budget, time, and sustainability.
+3.  **Query historical data:**
+    *   Filters the `TravelCost` model based on `destinationID` and the calculated date range.
+    *   Uses `annotate` to extract the year and month from the `start_date`.
+    *   Uses `values` to retrieve only the `title`, `price`, and `start_date` fields for optimization.
 
-## Dijkstra’s Algorithm
-    This is used for computing the optimal route for public transport with minimum travel time and cost.
+4.  **Iterate through historical data:**
+    *   Initializes an empty list `optimized_costs` to store optimized travel costs.
+    *   Initializes `total_optimized_cost` to 0.0 to accumulate the total optimized cost.
+    *   Loops through each `item` in the `historical_data` QuerySet.
 
-## AI Algorithms
-    These can analyze large volumes of data to discover patterns and predict areas where airlines may publish low fares, making it easier for passengers to access cheap routes and accommodation.
+5.  **Apply seasonality adjustment:**
+    *   Retrieves the month from the `start_date` of the current `item`.
+    *   Defines a list `peak_season_months` representing peak travel months.
+    *   If the month is in `peak_season_months`, increase the `price` by a random factor between 1.1 and 1.2.
+    *   Otherwise, decrease the `price` by a random factor between 0.9 and 0.95.
 
-The choice of algorithm depends on the specific requirements and constraints of the travel optimization problem.
+6.  **Apply budget constraint:**
+    *   If the adjusted `price` exceeds the provided `budget`, reduce the `price` to 90% of the budget.
+
+7.  **Store optimized cost:**
+    *   Append a dictionary containing the `title` and adjusted `price` to the `optimized_costs` list.
+    *   Add the adjusted `price` to the `total_optimized_cost`.
+
+8.  **Return results:**
+    *   Return the `optimized_costs` list and the `total_optimized_cost`.
+
+This function provides a baseline for estimating travel costs, incorporating adjustments for seasonality and budget constraints. Further enhancements could include more sophisticated algorithms, real-time data integration, and user-specific preferences.
