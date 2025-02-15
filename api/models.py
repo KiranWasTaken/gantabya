@@ -10,7 +10,17 @@ from django.conf import settings
 class User(AbstractUser):
     # Add custom fields if needed
     pass
-    
+
+
+class Image(models.Model):
+    name = models.CharField(max_length=255)
+    url = models.TextField(default="")
+    slug = models.TextField(default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+ 
 class Destination(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -19,10 +29,12 @@ class Destination(models.Model):
         choices=[('Local', 'Local'), ('International', 'International')],
         default= 'Local'
     )
+    Longitude = models.FloatField(default=0.0)
+    Latitude = models.FloatField(default=0.0)
     location = models.CharField(max_length=255)
     image = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    popularity = models.IntegerField(default=0)
+    popularity = models.FloatField(default=0.0)
 
     def __str__(self):
         return self.name

@@ -78,29 +78,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gantabya.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# local database
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'gantabya',
-#         'USER': 'gantabya_user',
-#         'PASSWORD': 'gantabya_password',
-#         'HOST': 'mysql-gantabya',
-#         'PORT': '3306',
-#     }
-# }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',  # This creates a SQLite database file in your project directory
-#     }
-# }
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',  # Correct Django backend for PostgreSQL

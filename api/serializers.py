@@ -1,11 +1,15 @@
 from rest_framework import serializers
-from .models import Destination, TravelPlan
+from .models import Destination, TravelPlan,Image
 
 class DestinationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Destination
         fields = '__all__'
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = '__all__'
 
 
 from rest_framework import serializers

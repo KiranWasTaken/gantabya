@@ -6,9 +6,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
-from .serializers import DestinationSerializer, TravelPlanSerializer
+from .serializers import DestinationSerializer, TravelPlanSerializer,ImageSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -19,12 +18,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import Destination
-from .models import TravelPlan
+from .models import Destination,Image,TravelPlan
 from .weather import get_weather
 from .utils import response
 
@@ -110,6 +104,24 @@ class ForgotPasswordView(APIView):
         return Response({"message": "Password reset email sent"}, status=status.HTTP_200_OK)
 
 
+
+
+#ImageCreateView
+class ImageCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        destinations = Image.objects.all()
+        serializer = ImageSerializer(destinations, many=True)
+        return response.success(data=serializer.data)
+
+    def post(self, request):
+        serializer = ImageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return response.success(data=serializer.data)
+        return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 #DestinationListCreateView
 class DestinationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -144,26 +156,36 @@ class PopularDestinationsView(APIView):
         return Response(serializer.data, status=200)
     
 
+class ImageSearchView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'slug']
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
+
+
 class DestinationSearchView(ListAPIView):
     queryset = Destination.objects.all()
     serializer_class = DestinationSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
-    search_fields = ['name', 'description', 'location']  # Fields to search
+    search_fields = ['name', 'description', 'location']
 
 
 class DestinationDetailView(APIView):
     def get(self, request, destination_id):
         try:
             destination = Destination.objects.get(id=destination_id)
-          
-            weather_data = get_weather(destination.name)  # Assuming `location` stores the city name
+            weather_data = get_weather(destination.name)
             response_data =  {
                 "destination": {
                     "name": destination.name,
                     "image":destination.image,
                     "description": destination.description,
                     "location": destination.location,
+                    "popularity": destination.popularity,
+                    "longitude": destination.Longitude,
+                    "latitude": destination.Latitude
                 },
                 "weather": weather_data
             }
