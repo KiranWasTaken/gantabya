@@ -20,7 +20,7 @@ class Destination(models.Model):
         default= 'Local'
     )
     location = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='destinations/')
+    image = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     popularity = models.IntegerField(default=0)
 

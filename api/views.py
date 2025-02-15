@@ -117,14 +117,14 @@ class DestinationListCreateView(APIView):
     def get(self, request):
         destinations = Destination.objects.all()
         serializer = DestinationSerializer(destinations, many=True)
-        return Response(serializer.data)
+        return response.success(data=serializer.data)
 
     def post(self, request):
         serializer = DestinationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return response.success(data=serializer.data)
+        return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 #Delete account
@@ -158,17 +158,18 @@ class DestinationDetailView(APIView):
             destination = Destination.objects.get(id=destination_id)
           
             weather_data = get_weather(destination.name)  # Assuming `location` stores the city name
-
-            return Response({
+            response_data =  {
                 "destination": {
                     "name": destination.name,
+                    "image":destination.image,
                     "description": destination.description,
                     "location": destination.location,
                 },
                 "weather": weather_data
-            }, status=status.HTTP_200_OK)
+            }
+            return response.success(data=response_data)
         except Destination.DoesNotExist:
-            return Response({"error": "Destination not found"}, status=status.HTTP_404_NOT_FOUND)
+            return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)
 
 # class DestinationDetailView(RetrieveAPIView):
 #     queryset = Destination.objects.all()
