@@ -20,7 +20,35 @@ class Image(models.Model):
 
     def __str__(self):
         return self.name
- 
+    
+class Airline(models.Model):
+    CreatedAt = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=255)
+    Price = models.FloatField(default=0.0)
+    DestinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
+    Rating = models.FloatField(default=0.0)
+    TimeTaken = models.FloatField(default=0.0)
+    Remarks = models.TextField(default="")
+
+class Hotel (models.Model):
+    CreatedAt = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=255)
+    Price = models.FloatField(default=0.0)
+    DestinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
+    Rating = models.FloatField(default=0.0)
+    Anemeties = models.TextField(default="")
+    Remarks = models.TextField(default="")
+
+
+class Bus(models.Model):
+    CreatedAt = models.DateTimeField(auto_now_add=True) 
+    name = models.CharField(max_length=255)
+    Price = models.FloatField(default=0.0)
+    DestinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
+    Rating = models.FloatField(default=0.0)
+    TimeTaken = models.FloatField(default=0.0)
+    Remarks = models.TextField(default="")
+    
 class Destination(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()

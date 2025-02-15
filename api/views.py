@@ -6,19 +6,17 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
-from .serializers import DestinationSerializer, TravelPlanSerializer,ImageSerializer
+from .serializers import DestinationSerializer, TravelPlanSerializer,ImageSerializer,AirlineSerializer,HotelSerializer,BusSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
-from .models import Destination,Image,TravelPlan
+from .models import Destination,Image,TravelPlan,Airline,Hotel,Bus
 from .weather import get_weather
 from .utils import response
 
@@ -33,10 +31,7 @@ class SignUpView(APIView):
             username = request.data.get('username')
             email = request.data.get('email')
             password = request.data.get('password')
-
-            # Debugging output
             print(f"Received: username={username}, email={email}, password={password}")
-
             if User.objects.filter(username=username).exists():
                 return response.error(message= "username already exists", status=status.HTTP_400_BAD_REQUEST)
             if User.objects.filter(email=email).exists():
@@ -122,6 +117,55 @@ class ImageCreateView(APIView):
             return response.success(data=serializer.data)
         return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+#AirlineCreateView
+class AirlineCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        destinations = Airline.objects.all()
+        serializer = AirlineSerializer(destinations, many=True)
+        return response.success(data=serializer.data)
+
+    def post(self, request):
+        
+        serializer = AirlineSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return response.success(data=serializer.data)
+        return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#HotelCreateView
+class HotelCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        destinations = Hotel.objects.all()
+        serializer = HotelSerializer(destinations, many=True)
+        return response.success(data=serializer.data)
+
+    def post(self, request):
+        serializer = HotelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return response.success(data=serializer.data)
+        return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#BusCreateView
+class BusCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        destinations = Bus.objects.all()
+        serializer = BusSerializer(destinations, many=True)
+        return response.success(data=serializer.data)
+
+    def post(self, request):
+        serializer = BusSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return response.success(data=serializer.data)
+        return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 #DestinationListCreateView
 class DestinationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -162,6 +206,27 @@ class ImageSearchView(ListAPIView):
     search_fields = ['name', 'slug']
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+
+class AirlineSearchView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'price']
+    queryset = Airline.objects.all()
+    serializer_class = AirlineSerializer
+
+class HotelSearchView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'price']
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+
+class BusSearchView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'price']
+    queryset = Bus.objects.all()
+    serializer_class = BusSerializer
 
 
 class DestinationSearchView(ListAPIView):
