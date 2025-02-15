@@ -24,16 +24,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Destination
 from .models import TravelPlan
-from .utils import get_weather
+from .weather import get_weather
+from .utils import response
 
 
+User = get_user_model()
+print(f"AUTH_USER_MODEL is {User}")
 
-
-
-User = get_user_model() 
-print(f"AUTH_USER_MODEL is {User}") 
 #Signup
-
 class SignUpView(APIView):
     def post(self, request):
         try:
@@ -45,19 +43,29 @@ class SignUpView(APIView):
             print(f"Received: username={username}, email={email}, password={password}")
 
             if User.objects.filter(username=username).exists():
-                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+                return response.error(message= "username already exists", status=status.HTTP_400_BAD_REQUEST)
             if User.objects.filter(email=email).exists():
-                return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+                return response.error(message="email already exists", status=status.HTTP_400_BAD_REQUEST)
 
             user = User.objects.create(
                 username=username,
                 email=email,
                 password=make_password(password)
             )
-            return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+            print(f"User created: {user}")
+            # Serializing user data for the response
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+            #  Corrected to pass status directly in the Response object,
+            #  assuming response.success only handles data and you use
+            #  DRF's Response for status codes
+            return  response.success(data=user_data)
         except Exception as e:
             print(f"Error occurred: {e}")  # Log the error
-            return Response({"error": "An unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return response.error(message=str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LoginView(APIView):
@@ -68,7 +76,7 @@ class LoginView(APIView):
         user = authenticate(username=username, password=password)
         if user is None:
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
+        
         refresh = RefreshToken.for_user(user)
         return Response({
             "refresh": str(refresh),
@@ -101,8 +109,6 @@ class ForgotPasswordView(APIView):
         return Response({"message": "Password reset email sent"}, status=status.HTTP_200_OK)
 
 #DestinationListCreateView
-
-
 class DestinationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
