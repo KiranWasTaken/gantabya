@@ -104,7 +104,6 @@ class ImageCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        print("request list image")
         slug = request.query_params.get('slug', None)
         queryset = Image.objects.all()
 
@@ -126,7 +125,10 @@ class AirlineCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        rating = request.query_params.get('rating', None)
         destinations = Airline.objects.all()
+        if rating is not None:
+            queryset = queryset.filter(rating=rating)
         serializer = AirlineSerializer(destinations, many=True)
         return response.success(data=serializer.data)
 
@@ -143,8 +145,11 @@ class HotelCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        destinations = Hotel.objects.all()
-        serializer = HotelSerializer(destinations, many=True)
+        rating = request.query_params.get('rating', None)
+        queryset = Hotel.objects.all()
+        if rating is not None:
+            queryset = queryset.filter(rating=rating)
+        serializer = HotelSerializer(queryset, many=True)
         return response.success(data=serializer.data)
 
     def post(self, request):
@@ -159,8 +164,11 @@ class BusCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        destinations = Bus.objects.all()
-        serializer = BusSerializer(destinations, many=True)
+        rating = request.query_params.get('rating', None)
+        queryset = Bus.objects.all()
+        if rating is not None:
+            queryset = queryset.filter(rating=rating)
+        serializer = BusSerializer(queryset, many=True)
         return response.success(data=serializer.data)
 
     def post(self, request):
@@ -192,8 +200,11 @@ class DestinationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        destinations = Destination.objects.all()
-        serializer = DestinationSerializer(destinations, many=True)
+        name = request.query_params.get('name', None)
+        queryset = Destination.objects.all()
+        if name is not None:
+            queryset = queryset.filter(name=name)
+        serializer = DestinationSerializer(queryset, many=True)
         return response.success(data=serializer.data)
 
     def post(self, request):
