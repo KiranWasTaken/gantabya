@@ -89,8 +89,6 @@ class LoginView(APIView):
         return response.success(data=login_data) # Assumes response.success is replaced with Response
 
 
-
-
 class ForgotPasswordView(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -110,6 +108,7 @@ class ForgotPasswordView(APIView):
             fail_silently=False,
         )
         return Response({"message": "Password reset email sent"}, status=status.HTTP_200_OK)
+
 
 #DestinationListCreateView
 class DestinationListCreateView(APIView):

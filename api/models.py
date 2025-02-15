@@ -11,7 +11,6 @@ class User(AbstractUser):
     # Add custom fields if needed
     pass
     
-
 class Destination(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
