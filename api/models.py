@@ -13,7 +13,7 @@ class User(AbstractUser):
 
 
 class Image(models.Model):
-    name = models.CharField(max_length=255)
+    Name = models.CharField(max_length=255)
     url = models.TextField(default="")
     slug = models.TextField(default="")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -22,32 +22,32 @@ class Image(models.Model):
         return self.name
     
 class Airline(models.Model):
-    CreatedAt = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
-    Price = models.FloatField(default=0.0)
-    DestinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
-    Rating = models.FloatField(default=0.0)
-    TimeTaken = models.FloatField(default=0.0)
-    Remarks = models.TextField(default="")
+    price = models.FloatField(default=0.0)
+    destinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
+    rating = models.FloatField(default=0.0)
+    timeTaken = models.FloatField(default=0.0)
+    remarks = models.TextField(default="")
 
 class Hotel (models.Model):
-    CreatedAt = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
-    Price = models.FloatField(default=0.0)
-    DestinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
-    Rating = models.FloatField(default=0.0)
-    Anemeties = models.TextField(default="")
-    Remarks = models.TextField(default="")
+    price = models.FloatField(default=0.0)
+    destinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
+    rating = models.FloatField(default=0.0)
+    anemeties = models.TextField(default="")
+    remarks = models.TextField(default="")
 
 
 class Bus(models.Model):
-    CreatedAt = models.DateTimeField(auto_now_add=True) 
+    createdAt = models.DateTimeField(auto_now_add=True) 
     name = models.CharField(max_length=255)
-    Price = models.FloatField(default=0.0)
-    DestinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
-    Rating = models.FloatField(default=0.0)
-    TimeTaken = models.FloatField(default=0.0)
-    Remarks = models.TextField(default="")
+    price = models.FloatField(default=0.0)
+    destinationID = models.ForeignKey('Destination', on_delete=models.CASCADE)
+    rating = models.FloatField(default=0.0)
+    timeTaken = models.FloatField(default=0.0)
+    remarks = models.TextField(default="")
     
 class Destination(models.Model):
     name = models.CharField(max_length=255)
@@ -57,8 +57,8 @@ class Destination(models.Model):
         choices=[('Local', 'Local'), ('International', 'International')],
         default= 'Local'
     )
-    Longitude = models.FloatField(default=0.0)
-    Latitude = models.FloatField(default=0.0)
+    longitude = models.FloatField(default=0.0)
+    latitude = models.FloatField(default=0.0)
     location = models.CharField(max_length=255)
     image = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

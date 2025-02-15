@@ -249,14 +249,71 @@ class DestinationDetailView(APIView):
                     "description": destination.description,
                     "location": destination.location,
                     "popularity": destination.popularity,
-                    "longitude": destination.Longitude,
-                    "latitude": destination.Latitude
+                    "longitude": destination.longitude,
+                    "latitude": destination.latitude
                 },
                 "weather": weather_data
             }
             return response.success(data=response_data)
         except Destination.DoesNotExist:
             return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)
+        
+class AirlineDetailView(APIView):
+    def get(self, request, airline_id):
+        try:
+            data = Airline.objects.get(id=airline_id)
+            print("data ",data.destinationID,data.id)
+            response_data =  {
+                    "id": data.id,
+                    "createdAt": data.createdAt,
+                    "name": data.name,
+                    "price":data.price,
+                    "rating": data.rating,
+                    "timeTaken": data.timeTaken,
+                    "remarks": data.remarks,
+                    "destinationID": data.destinationID.id,
+                    "location": data.destinationID.name,
+                }
+            return response.success(data=response_data)
+        except Destination.DoesNotExist:
+            return response.error(message="airline not found", status=status.HTTP_404_NOT_FOUND)
+        
+class HotelDetailView(APIView):
+    def get(self, request, hotel_id):
+        try:
+            data = Hotel.objects.get(id=hotel_id)
+            response_data =  {
+                    "id": data.id,
+                    "createdAt": data.createdAt,
+                    "name": data.name,
+                    "Price":data.price,
+                    "rating": data.rating,
+                    "remarks": data.remarks,
+                    "destinationID": data.destinationID.id,
+                     "location": data.destinationID.name,
+                }
+            return response.success(data=response_data)
+        except Destination.DoesNotExist:
+            return response.error(message="hotel not found", status=status.HTTP_404_NOT_FOUND)
+        
+class BusDetailView(APIView):
+    def get(self, request, bus_id):
+        try:
+            data = Bus.objects.get(id=bus_id)
+            response_data =  {
+                    "id": data.id,
+                    "createdAt": data.createdAt,
+                    "name": data.name,
+                    "price":data.price,
+                    "rating": data.rating,
+                    "timeTaken": data.timeTaken,
+                    "remarks": data.remarks,
+                    "destinationID": data.destinationID.id,
+                    "location": data.destinationID.name,
+                }
+            return response.success(data=response_data)
+        except Destination.DoesNotExist:
+            return response.error(message="bus not found", status=status.HTTP_404_NOT_FOUND)
 
 # class DestinationDetailView(RetrieveAPIView):
 #     queryset = Destination.objects.all()

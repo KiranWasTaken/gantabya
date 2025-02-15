@@ -15,7 +15,7 @@ class AirlineSerializer(serializers.ModelSerializer):
         """
         Check that the DestinationID exists.
         """
-        destination_id = data.get('DestinationID')
+        destination_id = data.get('destinationID')
         if destination_id:
             try:
                 Destination.objects.get(pk=destination_id.id)
@@ -33,7 +33,7 @@ class HotelSerializer(serializers.ModelSerializer):
         """
         Check that the DestinationID exists.
         """
-        destination_id = data.get('DestinationID')
+        destination_id = data.get('destinationID')
         if destination_id:
             try:
                 Destination.objects.get(pk=destination_id.id)
@@ -53,7 +53,7 @@ class BusSerializer(serializers.ModelSerializer):
         """
         Check that the DestinationID exists.
         """
-        destination_id = data.get('DestinationID')
+        destination_id = data.get('destinationID')
         if destination_id:
             try:
                 Destination.objects.get(pk=destination_id.id)

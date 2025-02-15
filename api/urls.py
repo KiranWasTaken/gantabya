@@ -23,12 +23,15 @@ urlpatterns = [
     #airlines
     path('airlines', AirlineCreateView.as_view(), name='airlines'),
     path('airlines', AirlineSearchView.as_view(), name='search-airlines'),
+    path('airlines/<int:airline_id>', AirlineDetailView.as_view(), name='airline-detail'),
 
     #buses
     path('buses', BusCreateView.as_view(), name='buses'),
     path('buses', BusSearchView.as_view(), name='search-buses'),
+    path('buses/<int:bus_id>', BusDetailView.as_view(), name='bus-detail'),
 
     #hotels
     path('hotels', HotelCreateView.as_view(), name='hotels'),
     path('hotels', HotelSearchView.as_view(), name='search-hotels'),
+    path('hotels/<int:hotel_id>', HotelDetailView.as_view(), name='hotel-detail'),
 ]
