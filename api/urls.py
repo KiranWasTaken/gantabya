@@ -3,10 +3,11 @@ from .views import *
 
 urlpatterns = [
     #public
-    path('signup', SignUpView.as_view(), name='signup'),
-    path('login', LoginView.as_view(), name='token_obtain_pair'),
-    path('forgot-password', ForgotPasswordView.as_view(), name='forgot-password'),
-    path('delete-account', DeleteAccountView.as_view(), name='delete-account'),
+    path('user/signup', SignUpView.as_view(), name='signup'),
+    path('user/login', LoginView.as_view(), name='token_obtain_pair'),
+    path('user/forgot-password', ForgotPasswordView.as_view(), name='forgot-password'),
+    path('user/delete-account', DeleteAccountView.as_view(), name='delete-account'),
+    path('user/<int:user_id>/travel-cost', UserTravelCostView.as_view(), name='travel-cost'),
 
     #destinations
     path('destinations', DestinationListCreateView.as_view(), name='destination-list-create'),
@@ -14,12 +15,15 @@ urlpatterns = [
     path('destinations/popular', PopularDestinationsView.as_view(), name='popular-destinations'),
     path('destinations/<int:destination_id>', DestinationDetailView.as_view(), name='destination-detail'),
     path('destinations/<int:destination_id>', DeleteDestinationView.as_view(), name='delete-destination'),
-
-    path('travel-plans', TravelPlanCreateView.as_view(), name='travel-plans'),
+    path('destinations/<int:destination_id>/airlines', DestinationListAirlineView.as_view(), name='delete-destination'),
+    path('destinations/<int:destination_id>/hotels', DestinationListHotelView.as_view(), name='delete-destination'),
+    path('destinations//buses', DestinationListBusView.as_view(), name='delete-destination'),
+    path('destinations/<int:destination_id>/optimal-cost', OptimalCostView.as_view(), name='optimal-cost'),
 
     #images
     path('images', ImageCreateView.as_view(), name='image-create'),
     path('images', ImageSearchView.as_view(), name='image-search-images'),
+    path('images/<int:image_id>', ImageDetailView.as_view(), name='image-detail'),
 
     #airlines
     path('airlines', AirlineCreateView.as_view(), name='airlines'),
@@ -38,4 +42,8 @@ urlpatterns = [
     path('hotels', HotelSearchView.as_view(), name='search-hotels'),
     path('hotels/<int:hotel_id>', HotelDetailView.as_view(), name='hotel-detail'),
     path('hotels/<int:hotel_id>', DeleteHotelView.as_view(), name='delete-hotel'),
+
+    # TravelCost
+    path('travel-cost', TravelCostCreateView.as_view(), name='travel-cost'),
+    path('travel-cost', TravelCostSearchView.as_view(), name='search-travel-cost'),
 ]

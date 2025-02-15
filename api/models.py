@@ -13,10 +13,10 @@ class User(AbstractUser):
 
 
 class Image(models.Model):
-    Name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     url = models.TextField(default="")
     slug = models.TextField(default="")
-    created_at = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -67,19 +67,15 @@ class Destination(models.Model):
     def __str__(self):
         return self.name
     
+class TravelCost(models.Model):
+    destinationID = models.ForeignKey(Destination, on_delete=models.CASCADE)
+    userID = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    price = models.FloatField(default=0.0)
+    start_date = models.DateField()
+    end_date = models.DateField()
 
-# class TravelPlan(models.Model):
-#     destination = models.ForeignKey(Destination, on_delete=models.CASCADE)
-#     user = models.ForeignKey('User', on_delete=models.CASCADE)
-#     food_type = models.CharField(max_length=50, choices=(('Veg', 'Veg'), ('Non-Veg', 'Non-Veg')))
-#     lodging_type = models.CharField(max_length=50, choices=(('Hotel', 'Hotel'), ('Homestay', 'Homestay')))
-#     number_of_people = models.IntegerField()
-#     start_date = models.DateField()
-#     end_date = models.DateField()
-#     total_cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
-#     def __str__(self):
-#         return f"{self.user.username}'s plan for {self.destination.name}"
 from .models import Destination
 class TravelPlan(models.Model):
     destination = models.ForeignKey('Destination', on_delete=models.CASCADE)

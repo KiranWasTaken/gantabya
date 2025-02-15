@@ -1,22 +1,20 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
-from .serializers import DestinationSerializer, TravelPlanSerializer,ImageSerializer,AirlineSerializer,HotelSerializer,BusSerializer
+from .serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
-from .models import Destination,Image,TravelPlan,Airline,Hotel,Bus
+from .models import *
 from .weather import get_weather
 from .utils import response
 
@@ -85,7 +83,7 @@ class ForgotPasswordView(APIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"error": "Email not found"}, status=status.HTTP_404_NOT_FOUND)
+            return response.error(message="User not found", status=status.HTTP_404_NOT_FOUND)
 
         # Simulating sending an email (replace with actual email logic)
         reset_token = "RESET12345"  # You can generate a token dynamically
@@ -96,9 +94,7 @@ class ForgotPasswordView(APIView):
             [email],
             fail_silently=False,
         )
-        return Response({"message": "Password reset email sent"}, status=status.HTTP_200_OK)
-
-
+        return response.success(message="password reset email sent")
 
 
 #ImageCreateView
@@ -106,9 +102,15 @@ class ImageCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        destinations = Image.objects.all()
-        serializer = ImageSerializer(destinations, many=True)
-        return response.success(data=serializer.data)
+        print("request list image")
+        slug = request.query_params.get('slug', None)
+        queryset = Image.objects.all()
+
+        if slug is not None:
+            queryset = queryset.filter(slug=slug)
+
+        serializer = ImageSerializer(queryset, many=True)
+        return response.success(serializer.data)
 
     def post(self, request):
         serializer = ImageSerializer(data=request.data)
@@ -165,7 +167,24 @@ class BusCreateView(APIView):
             serializer.save()
             return response.success(data=serializer.data)
         return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+#TravelCost
+class TravelCostCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        
+        destinations = TravelCost.objects.all()
+        serializer = TravelCostSerializer(destinations, many=True)
+        return response.success(data=serializer.data)
+
+    def post(self, request):
+        serializer = TravelCostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return response.success(data=serializer.data)
+        return response.error(message=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 #DestinationListCreateView
 class DestinationListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -239,10 +258,11 @@ class DeleteHotelView(APIView):
             return response.error(message="hotel not found", status=status.HTTP_404_NOT_FOUND)
         
 class PopularDestinationsView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         popular_destinations = Destination.objects.order_by('-popularity')[:10]
         serializer = DestinationSerializer(popular_destinations, many=True)
-        return Response(serializer.data, status=200)
+        return response.success(data=serializer.data)
     
 
 class ImageSearchView(ListAPIView):
@@ -281,8 +301,16 @@ class DestinationSearchView(ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['name', 'description', 'location']
 
+class TravelCostSearchView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'price']
+    queryset = TravelCost.objects.all()
+    serializer_class = TravelCostSerializer
+
 
 class DestinationDetailView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, destination_id):
         try:
             destination = Destination.objects.get(id=destination_id)
@@ -303,6 +331,77 @@ class DestinationDetailView(APIView):
         except Destination.DoesNotExist:
             return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)
         
+class DestinationListAirlineView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, destination_id):
+        try:
+            data = Airline.objects.filter(destinationID=destination_id)
+            serializer = AirlineSerializer(data, many=True)
+            return response.success(data=serializer.data)
+        except Destination.DoesNotExist:
+            return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)
+
+class DestinationListHotelView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, destination_id):
+        try:
+            data = Hotel.objects.filter(destinationID=destination_id)
+            serializer = HotelSerializer(data, many=True)
+            return response.success(data=serializer.data)
+        except Destination.DoesNotExist:
+            return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)
+        
+class DestinationListBusView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, destination_id):
+        try:
+            data = Bus.objects.filter(destinationID=destination_id)
+            serializer = BusSerializer(data, many=True)
+            return response.success(data=serializer.data)
+        except Destination.DoesNotExist:
+            return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)    
+
+# OptimalCost
+class OptimalCostView(APIView):
+    def get(self, request, destination_id):
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+        budget = request.query_params.get("budget")
+
+        if not all([destination_id, start_date_str, end_date_str, budget]):
+            return response.error(message="Missing required parameters", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            budget = float(budget)
+            destination_id = int(destination_id) #ensure it is an integer for querying
+        except ValueError:
+            return response.error(message="Invalid date format", status=status.HTTP_400_BAD_REQUEST)
+
+        estimated_cost = cost_estimation(destination_id, start_date, end_date, budget)
+
+        return response.success(data={"estimated_cost": estimated_cost})
+
+class UserTravelCostView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, user_id):
+        total_cost = 0.0
+        days=0.0
+        try:
+            data = TravelCost.objects.filter(userID=user_id)
+            for i in data:
+                duration_days = (i.end_date - i.start_date).days
+                total_cost += i.price*duration_days
+            serializer = TravelCostSerializer(data, many=True)
+            response_data = {
+                "items": serializer.data,
+                "total_cost": total_cost
+                }
+            return response.success(data=response_data)
+        except Destination.DoesNotExist:
+            return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)
+              
 class AirlineDetailView(APIView):
     def get(self, request, airline_id):
         try:
@@ -322,6 +421,21 @@ class AirlineDetailView(APIView):
             return response.success(data=response_data)
         except Destination.DoesNotExist:
             return response.error(message="airline not found", status=status.HTTP_404_NOT_FOUND)
+        
+class ImageDetailView(APIView):
+    def get(self, request, image_id):
+        try:
+            data = Image.objects.get(id=image_id)
+            response_data =  {
+                    "id": data.id,
+                    "createdAt": data.createdAt,
+                    "name": data.name,
+                    "slug":data.slug,
+                    "url": data.url
+                }
+            return response.success(data=response_data)
+        except Destination.DoesNotExist:
+            return response.error(message="image not found", status=status.HTTP_404_NOT_FOUND)
         
 class HotelDetailView(APIView):
     def get(self, request, hotel_id):
@@ -361,32 +475,7 @@ class BusDetailView(APIView):
         except Destination.DoesNotExist:
             return response.error(message="bus not found", status=status.HTTP_404_NOT_FOUND)
 
-# class DestinationDetailView(RetrieveAPIView):
-#     queryset = Destination.objects.all()
-#     serializer_class = DestinationSerializer
-#     lookup_field = 'id'  # ID to be used in the URL
-
-
-# #Travel Plan
-# class TravelPlanCreateView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def post(self, request):
-#         serializer = TravelPlanSerializer(data=request.data)
-#         if serializer.is_valid():
-#             travel_plan = serializer.save(user=request.user)
-#             total_cost = calculate_cost(travel_plan)  # Calculate cost
-#             travel_plan.total_cost = total_cost
-#             travel_plan.save()  # Save the total cost to the database
-#             return Response(
-#                 {"message": "Travel plan created", "total_cost": total_cost},
-#                 status=status.HTTP_201_CREATED,
-#             )
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 def calculate_cost(travel_plan):
-    # Example Base Costs
     base_food_cost = 10 if travel_plan.food_type == 'Veg' else 15
     base_lodging_cost = {
         'Hotel': 100,
@@ -424,59 +513,6 @@ def fetch_travel_options(destination, food_type, lodging):
     }
     return options.get(destination.destination_type, ["Unknown"])
 
-class TravelPlanCreateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        serializer = TravelPlanSerializer(data=request.data)
-        if serializer.is_valid():
-            travel_plan = serializer.save()
-            travel_plan.total_cost = calculate_cost(travel_plan)  # Calculate Cost
-            # Calculate the total cost
-            duration = (travel_plan.end_date - travel_plan.start_date).days
-            base_cost = {
-                'Veg': 100,
-                'Non-Veg': 200,
-            }[travel_plan.food_type] * travel_plan.individual_count
-
-            lodging_cost = {
-                'Hotel': 1000,
-                'Lodge': 500,
-                'Resort': 2000,
-            }[travel_plan.lodging] * duration * travel_plan.individual_count
-
-            total_cost = base_cost + lodging_cost
-            # Apply discounts
-            discount = 0
-            if duration > 7:
-                discount += 0.10 * total_cost  # 10% duration discount
-            if travel_plan.individual_count > 5:
-                discount += 0.15 * total_cost  # 15% group discount
-
-            discounted_total = total_cost - discount
-
-            travel_plan.pricing_segment = calculate_pricing_segment(travel_plan.total_cost)  # Determine Pricing Segment
-            travel_plan.travel_options = fetch_travel_options(travel_plan.destination, travel_plan.food_type, travel_plan.lodging)  # Fetch Travel Options
-            travel_plan.save()
-            # return Response({"message": "Travel plan created", "total_cost": travel_plan.total_cost,
-            #         "pricing_segment": travel_plan.pricing_segment,
-            #         "travel_options": travel_plan.travel_options,}, status=status.HTTP_201_CREATED)
-            return Response({
-                "message": "Travel plan created successfully.",
-                "total_cost": total_cost,
-                "discount": discount,
-                "final_price": discounted_total,
-                "details": {
-                    "destination": travel_plan.destination.name,
-                    "duration": duration,
-                    "individual_count": travel_plan.individual_count,
-                    "lodging": travel_plan.lodging,
-                    "food_type": travel_plan.food_type,
-                }
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 def fetch_weather_data(city_name):
     """Fetch weather data from an external API."""
@@ -508,3 +544,24 @@ def fetch_weather_data(city_name):
             "error": "Request failed",
             "details": str(req_err)
         }
+    
+def cost_estimation(destination_id, start_date, end_date, budget):
+    """
+    Estimates the optimized travel cost based on historical data.
+    """
+    # Retrieve historical data for the given destination
+    historical_data = TravelCost.objects.filter(
+        destinationID=destination_id,
+        start_date__range=[start_date - timedelta(days=365), start_date + timedelta(days=365)] #A year range of historical data from a year ago to a year from now
+    ).values('price', 'start_date') #Fetch only price and start_date for optimized performance.  Important to use values()
+
+    # Convert the QuerySet to a list of dictionaries
+    historical_data_list = list(historical_data)
+
+    # Calculate average price
+    if historical_data_list: #Only runs if the historical list is populated
+        average_price = sum(item['price'] for item in historical_data_list) / len(historical_data_list)
+    else: #No data, so returns a base rate
+        average_price = 100 #Set a base cost if no data
+
+    return average_price  
