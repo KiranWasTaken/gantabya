@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from django.contrib.auth import authenticate
 from .serializers import DestinationSerializer, TravelPlanSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -59,9 +60,6 @@ class SignUpView(APIView):
                 'username': user.username,
                 'email': user.email
             }
-            #  Corrected to pass status directly in the Response object,
-            #  assuming response.success only handles data and you use
-            #  DRF's Response for status codes
             return  response.success(data=user_data)
         except Exception as e:
             print(f"Error occurred: {e}")  # Log the error
@@ -72,20 +70,25 @@ class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-
         user = authenticate(username=username, password=password)
         if user is None:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        
+            return response.error(message="invalid credentials", status=status.HTTP_401_UNAUTHORIZED)
+
+        print(f"User authenticated: {user}")
         refresh = RefreshToken.for_user(user)
-        return Response({
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        }
+        login_data = {
             "refresh": str(refresh),
             "access": str(refresh.access_token),
-        }, status=status.HTTP_200_OK)
+            "user": user_data
+        }
+        return response.success(data=login_data) # Assumes response.success is replaced with Response
 
 
-class LoginView(TokenObtainPairView):
-    pass
 
 
 class ForgotPasswordView(APIView):
