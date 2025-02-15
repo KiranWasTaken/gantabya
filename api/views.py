@@ -190,9 +190,54 @@ class DeleteAccountView(APIView):
     def delete(self, request):
         user = request.user
         user.delete()
-        return Response({"message": "Account deleted successfully."}, status=status.HTTP_200_OK)
+        return response.success(message="account deleted successfully.")
     
 
+class DeleteDestinationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, destination_id):
+        try:
+            destination = Destination.objects.get(id=destination_id)
+            destination.delete()
+            return response.success(message="destination deleted successfully.")
+        except Destination.DoesNotExist:
+            return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)
+    
+
+class DeleteArilineView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, airline_id):  
+        try:
+            airline = Airline.objects.get(id=airline_id)
+            airline.delete()
+            return response.success(message="hotel deleted successfully.")
+        except Airline.DoesNotExist:
+            return response.error(message="airline not found", status=status.HTTP_404_NOT_FOUND)
+
+class DeleteBusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, bus_id):
+        try:
+            bus = Bus.objects.get(id=bus_id)
+            bus.delete()
+            return response.success(message="bus deleted successfully.")
+        except Bus.DoesNotExist:    
+            return response.error(message="bus not found", status=status.HTTP_404_NOT_FOUND)
+        
+class DeleteHotelView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, hotel_id):
+        try:
+            hotel = Hotel.objects.get(id=hotel_id)
+            hotel.delete()
+            return response.success(message="hotel deleted successfully.")
+        except Hotel.DoesNotExist:
+            return response.error(message="hotel not found", status=status.HTTP_404_NOT_FOUND)
+        
 class PopularDestinationsView(APIView):
     def get(self, request):
         popular_destinations = Destination.objects.order_by('-popularity')[:10]
