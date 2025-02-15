@@ -13,7 +13,7 @@ urlpatterns = [
     path('destinations', DestinationSearchView.as_view(), name='search-destinations'),
     path('destinations/popular', PopularDestinationsView.as_view(), name='popular-destinations'),
     path('destinations/<int:destination_id>', DestinationDetailView.as_view(), name='destination-detail'),
-    path('destinations/<int:destination_id>/delete', DeleteDestinationView.as_view(), name='delete-destination'),
+    path('destinations/<int:destination_id>', DeleteDestinationView.as_view(), name='delete-destination'),
 
     path('travel-plans', TravelPlanCreateView.as_view(), name='travel-plans'),
 
@@ -25,17 +25,17 @@ urlpatterns = [
     path('airlines', AirlineCreateView.as_view(), name='airlines'),
     path('airlines', AirlineSearchView.as_view(), name='search-airlines'),
     path('airlines/<int:airline_id>', AirlineDetailView.as_view(), name='airline-detail'),
-    path('airlines/<int:airline_id>/delete', DeleteArilineView.as_view(), name='delete-airline'),
+    path('airlines/<int:airline_id>', DeleteArilineView.as_view(), name='delete-airline'),
 
     #buses
     path('buses', BusCreateView.as_view(), name='buses'),
     path('buses', BusSearchView.as_view(), name='search-buses'),
     path('buses/<int:bus_id>', BusDetailView.as_view(), name='bus-detail'),
-    path('buses/<int:bus_id>/delete', DeleteBusView.as_view(), name='delete-bus'),
+    path('buses/<int:bus_id>', DeleteBusView.as_view(), name='delete-bus'),
 
     #hotels
     path('hotels', HotelCreateView.as_view(), name='hotels'),
     path('hotels', HotelSearchView.as_view(), name='search-hotels'),
     path('hotels/<int:hotel_id>', HotelDetailView.as_view(), name='hotel-detail'),
-    path('hotels/<int:hotel_id>/delete', DeleteHotelView.as_view(), name='delete-hotel'),
+    path('hotels/<int:hotel_id>', DeleteHotelView.as_view(), name='delete-hotel'),
 ]

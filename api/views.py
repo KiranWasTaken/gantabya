@@ -334,6 +334,7 @@ class HotelDetailView(APIView):
                     "Price":data.price,
                     "rating": data.rating,
                     "remarks": data.remarks,
+                    "anemeties":data.anemeties,
                     "destinationID": data.destinationID.id,
                      "location": data.destinationID.name,
                 }
