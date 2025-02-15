@@ -1,5 +1,7 @@
 import requests
 from datetime import datetime, timedelta
+from django.db.models import Avg, F
+import random
 from django.conf import settings
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
@@ -379,9 +381,9 @@ class OptimalCostView(APIView):
         except ValueError:
             return response.error(message="Invalid date format", status=status.HTTP_400_BAD_REQUEST)
 
-        estimated_cost = cost_estimation(destination_id, start_date, end_date, budget)
+        response_data = cost_estimation(destination_id, start_date, end_date, budget)
 
-        return response.success(data={"estimated_cost": estimated_cost})
+        return response.success(data={"estimated_cost": response_data})
 
 class UserTravelCostView(APIView):
     permission_classes = [IsAuthenticated]
@@ -547,21 +549,40 @@ def fetch_weather_data(city_name):
     
 def cost_estimation(destination_id, start_date, end_date, budget):
     """
-    Estimates the optimized travel cost based on historical data.
+    Estimates the optimized travel cost for a given destination, returning
+    a list of dictionaries, each containing a title and optimized cost.
     """
-    # Retrieve historical data for the given destination
+    date_range_start = start_date - timedelta(days=365)
+    date_range_end = start_date + timedelta(days=365)
+
     historical_data = TravelCost.objects.filter(
         destinationID=destination_id,
-        start_date__range=[start_date - timedelta(days=365), start_date + timedelta(days=365)] #A year range of historical data from a year ago to a year from now
-    ).values('price', 'start_date') #Fetch only price and start_date for optimized performance.  Important to use values()
+        start_date__range=[date_range_start, date_range_end]
+    ).annotate(
+        year=F('start_date__year'),
+        month=F('start_date__month')
+    ).values('title', 'price', 'start_date')
 
-    # Convert the QuerySet to a list of dictionaries
-    historical_data_list = list(historical_data)
+    optimized_costs = []
+    total_optimized_cost = 0.0
 
-    # Calculate average price
-    if historical_data_list: #Only runs if the historical list is populated
-        average_price = sum(item['price'] for item in historical_data_list) / len(historical_data_list)
-    else: #No data, so returns a base rate
-        average_price = 100 #Set a base cost if no data
+    for item in historical_data:
+        title = item['title']
+        price = item['price']
 
-    return average_price  
+        # Apply seasonality adjustment (example logic)
+        month = item['start_date'].month
+        peak_season_months = [6, 7, 8, 12, 1]
+        if month in peak_season_months:
+            price *= random.uniform(1.1, 1.2)
+        else:
+            price *= random.uniform(0.9, 0.95)
+
+        # Apply budget constraint (example logic)
+        if price > budget:
+            price = budget * 0.9
+
+        optimized_costs.append({"title": title, "cost": price})
+        total_optimized_cost += price
+
+    return optimized_costs, total_optimized_cost
