@@ -19,6 +19,8 @@ urlpatterns = [
     path('destinations/<int:destination_id>/hotels', DestinationListHotelView.as_view(), name='delete-destination'),
     path('destinations//buses', DestinationListBusView.as_view(), name='delete-destination'),
     path('destinations/<int:destination_id>/optimal-cost', OptimalCostView.as_view(), name='optimal-cost'),
+    path('destinations/popular', PopularDestinationsView.as_view(), name='popular-destinations'),
+    path('destinations/search', DestinationSearchView.as_view(), name='search-destinations'),
 
     #images
     path('images', ImageCreateView.as_view(), name='image-create'),

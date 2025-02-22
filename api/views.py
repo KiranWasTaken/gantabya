@@ -373,7 +373,66 @@ class DestinationListBusView(APIView):
             return response.success(data=serializer.data)
         except Destination.DoesNotExist:
             return response.error(message="destination not found", status=status.HTTP_404_NOT_FOUND)    
+        
 
+class DestinationSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        # Retrieve the search query; default to empty string if not provided
+        query = request.query_params.get('search', '').lower()
+        destinations = list(Destination.objects.all())
+        if query:
+            filtered_destinations = []
+            for destination in destinations:
+                if (query in destination.name.lower() or 
+                    query in destination.description.lower() or 
+                    query in destination.location.lower()):
+                    filtered_destinations.append(destination)
+        else:
+            # If no search query, return all destinations
+            filtered_destinations = destinations
+        
+        serializer = DestinationSerializer(filtered_destinations, many=True)
+        return response.success(data=serializer.data)
+
+class PopularDestinationsView(APIView):
+    permission_classes = [IsAuthenticated]
+    def merge_sort_destinations(self, destinations):
+        # Base case: if the list has 0 or 1 elements, it is already sorted.
+        if len(destinations) <= 1:
+            return destinations
+        mid = len(destinations) // 2
+        left = self.merge_sort_destinations(destinations[:mid])
+        right = self.merge_sort_destinations(destinations[mid:])
+        return self.merge(left, right)
+    def merge(self, left, right):
+        sorted_list = []
+        i, j = 0, 0
+
+        # Since we want the most popular destinations first,
+        # we compare such that higher popularity comes before lower.
+        while i < len(left) and j < len(right):
+            if left[i].popularity >= right[j].popularity:
+                sorted_list.append(left[i])
+                i += 1
+            else:
+                sorted_list.append(right[j])
+                j += 1
+        # Append any remaining items
+        sorted_list.extend(left[i:])
+        sorted_list.extend(right[j:])
+        return sorted_list
+
+    def get(self, request):
+        # Retrieve all destinations from the database
+        destinations = list(Destination.objects.all())
+        # Sort destinations by popularity in descending order
+        sorted_destinations = self.merge_sort_destinations(destinations)
+        # Select the top 10 destinations
+        popular_destinations = sorted_destinations[:10]
+        serializer = DestinationSerializer(popular_destinations, many=True)
+        return response.success(data=serializer.data)
+    
 # OptimalCost
 class OptimalCostView(APIView):
     def get(self, request, destination_id):
